@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "rainfrog"
     ports:
-      - "${PG_PORT}:5432"
+      - "5432:5432"
     volumes:
       - ./dev/pg_init.sql:/docker-entrypoint-initdb.d/00_init.sql
   rainfrog-mysql:
@@ -17,6 +17,18 @@ services:
       MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: "rainfrog"
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "3306:3306"
     volumes:
       - ./dev/mysql_init.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  rainfrog-oracle:
+    image: oriolrt/oracle-23ai
+    container_name: oracle23ai
+    environment:
+      - ORACLE_PWD=password
+    ports:
+      - "1521:1521"  # Oracle Database listener
+      - "5500:5500"  # Oracle Enterprise Manager (OEM) Express
+      - "2222:22"    # SSH access
+    # tty: true        # Equivalent to the `-t` option in `docker run`
+    # stdin_open: true # Equivalent to the `-i` option in `docker run`

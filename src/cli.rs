@@ -52,6 +52,7 @@ pub enum Driver {
   Postgres,
   Mysql,
   Sqlite,
+  Oracle,
 }
 
 impl FromStr for Driver {
@@ -62,6 +63,7 @@ impl FromStr for Driver {
       "postgres" | "postgresql" => Ok(Driver::Postgres),
       "mysql" => Ok(Driver::Mysql),
       "sqlite" => Ok(Driver::Sqlite),
+      "oracle" => Ok(Driver::Oracle),
       _ => Err(eyre::Report::msg("Invalid driver")),
     }
   }
@@ -78,7 +80,7 @@ pub fn extract_driver_from_url(url: &str) -> Result<Driver> {
 
 pub fn prompt_for_driver() -> Result<Driver> {
   let mut driver = String::new();
-  print!("Database driver (postgres, mysql, sqlite): ");
+  print!("Database driver (postgres, mysql, sqlite, oracle): ");
   io::stdout().flush()?;
   io::stdin().read_line(&mut driver)?;
   driver.trim().to_lowercase().parse()

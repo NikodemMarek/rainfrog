@@ -47,6 +47,39 @@ where
   Ok(())
 }
 
+async fn run_app_oracle(mut args: Cli) -> Result<()> {
+  let conn = oracle::Connection::connect("system", "password", "//0.0.0.0:1521/FREEPDB1")?;
+
+  conn.execute("create table person (id number(38), name varchar2(40))", &[])?;
+  conn.execute(
+    "insert into person values (:1, :2)",
+    &[
+      &1,      // first parameter
+      &"John", // second parameter
+    ],
+  )?;
+  conn.execute_named(
+    "insert into person values (:id, :name)",
+    &[
+      ("id", &2),         // 'id' parameter
+      ("name", &"Smith"), // 'name' parameter
+    ],
+  )?;
+  conn.commit()?;
+
+  let rows = conn.query("select * from person", &[&30])?;
+  println!("---------------|---------------|---------------|");
+  for row_result in rows {
+    let row = row_result?;
+    let ename: String = row.get(0)?;
+    // let sal: String = row.get(1)?;
+
+    println!(" {:14}|  ", ename);
+  }
+
+  Ok(())
+}
+
 async fn tokio_main() -> Result<()> {
   initialize_logging()?;
 
@@ -60,10 +93,12 @@ async fn tokio_main() -> Result<()> {
   } else {
     prompt_for_driver()?
   };
+
   match driver {
     Driver::Postgres => run_app::<Postgres>(args).await,
     Driver::Mysql => run_app::<MySql>(args).await,
     Driver::Sqlite => run_app::<Sqlite>(args).await,
+    Driver::Oracle => run_app_oracle(args).await,
   }
 }
 
